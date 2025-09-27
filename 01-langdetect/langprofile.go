@@ -129,9 +129,9 @@ func CalculateDistance(langProfile, textProfile Profile) int {
 		langIdx := findBigramIndex(langProfile.Bigrams, textBigram)
 		if langIdx == -1 {
 			distance += 1000
+		} else {
+			distance += abs(langIdx - textIdx)
 		}
-
-		distance += abs(langIdx - textIdx)
 	}
 
 	return distance
