@@ -11,9 +11,9 @@ import (
 )
 
 func main() {
-	profileFile := flag.String("profile", "", "Path to language profile file")
-	trainDir := flag.String("train", "", "Path to training directory")
-	verbose := flag.Bool("verbose", false, "Enable verbose output")
+	profileFile := flag.String("profile", "", "")
+	trainDir := flag.String("train", "", "")
+	verbose := flag.Bool("verbose", false, "")
 	flag.Parse()
 
 	if *profileFile == "" {
@@ -21,7 +21,6 @@ func main() {
 	}
 
 	if *trainDir != "" {
-		// Training mode
 		profiles, err := TrainProfiles(*trainDir)
 		if err != nil {
 			log.Fatalf("Training failed: %v", err)
@@ -35,13 +34,11 @@ func main() {
 		return
 	}
 
-	// Detection mode
 	profiles, err := LoadProfiles(*profileFile)
 	if err != nil {
 		log.Fatalf("Failed to load profiles: %v", err)
 	}
 
-	// Read text from stdin
 	reader := bufio.NewReader(os.Stdin)
 	var textBuilder strings.Builder
 
@@ -61,10 +58,8 @@ func main() {
 		log.Fatal("No text provided for detection")
 	}
 
-	// Build profile for input text
 	textProfile := BuildProfileFromText(text)
 
-	// Calculate distances for all languages
 	results := make([]LanguageResult, 0, len(profiles))
 	for lang, profile := range profiles {
 		distance := CalculateDistance(profile, textProfile)
@@ -74,17 +69,14 @@ func main() {
 		})
 	}
 
-	// Sort by distance (ascending)
 	SortResults(results)
 
 	if *verbose {
-		// Verbose output
 		fmt.Println("Language detection results (sorted by distance):")
 		for _, result := range results {
 			fmt.Printf("%s: %d\n", result.Language, result.Distance)
 		}
 	} else {
-		// Normal output - best match
 		if len(results) > 0 {
 			fmt.Println(results[0].Language)
 		} else {

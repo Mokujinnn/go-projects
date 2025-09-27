@@ -71,7 +71,6 @@ func TestProfileSerialization(t *testing.T) {
 		"ru": {Bigrams: []string{"то", "на", "ов"}},
 	}
 
-	// Test round-trip
 	tempFile := "test_profiles.json"
 	defer os.Remove(tempFile)
 

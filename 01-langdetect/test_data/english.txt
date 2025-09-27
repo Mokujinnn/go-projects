@@ -1,0 +1,4 @@
+The quick brown fox jumps over the lazy dog. This is a simple English text 
+for testing our language detection algorithm. Programming is fun and 
+challenging at the same time. Hello world from the test example.
+Artificial intelligence and machine learning are transforming our world.
