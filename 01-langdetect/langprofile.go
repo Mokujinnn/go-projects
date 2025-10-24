@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -49,7 +48,7 @@ func TrainProfiles(trainDir string) (map[string]Profile, error) {
 		profile := BuildProfileFromText(string(content))
 		profiles[lang] = profile
 
-		log.Printf("Trained profile for %s (%d bigrams)", lang, len(profile.Bigrams))
+		fmt.Printf("Trained profile for %s (%d bigrams)\n", lang, len(profile.Bigrams))
 		return nil
 	})
 
