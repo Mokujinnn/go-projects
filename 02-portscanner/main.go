@@ -24,13 +24,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Parse port range
 	portRange, err := scanner.ParsePortRange(*ports)
 	if err != nil {
 		log.Fatalf("Error parsing port range: %v", err)
 	}
 
-	// Create scanner config
 	config := &scanner.Config{
 		Host:      *host,
 		PortRange: portRange,
@@ -39,10 +37,8 @@ func main() {
 		GetBanner: *banner,
 	}
 
-	// Run scan
 	results := scanner.Scan(config)
 
-	// Print results
 	for _, result := range results {
 		if result.Open {
 			if *banner && result.Banner != "" {
