@@ -28,12 +28,10 @@ type Config struct {
 func ParsePortRange(portsStr string) ([]int, error) {
 	var ports []int
 
-	// Handle comma-separated ports
 	if strings.Contains(portsStr, ",") {
 		parts := strings.Split(portsStr, ",")
 		for _, part := range parts {
 			if strings.Contains(part, "-") {
-				// Handle range
 				rangeParts := strings.Split(part, "-")
 				if len(rangeParts) != 2 {
 					return nil, fmt.Errorf("invalid port range: %s", part)
@@ -52,7 +50,6 @@ func ParsePortRange(portsStr string) ([]int, error) {
 					}
 				}
 			} else {
-				// Handle single port
 				port, err := strconv.Atoi(strings.TrimSpace(part))
 				if err != nil {
 					return nil, fmt.Errorf("invalid port number: %s", part)
@@ -63,7 +60,6 @@ func ParsePortRange(portsStr string) ([]int, error) {
 			}
 		}
 	} else if strings.Contains(portsStr, "-") {
-		// Handle simple range
 		rangeParts := strings.Split(portsStr, "-")
 		if len(rangeParts) != 2 {
 			return nil, fmt.Errorf("invalid port range: %s", portsStr)
@@ -82,7 +78,6 @@ func ParsePortRange(portsStr string) ([]int, error) {
 			}
 		}
 	} else {
-		// Handle single port
 		port, err := strconv.Atoi(strings.TrimSpace(portsStr))
 		if err != nil {
 			return nil, fmt.Errorf("invalid port number: %s", portsStr)
@@ -104,20 +99,18 @@ func Scan(config *Config) []ScanResult {
 	resultChan := make(chan ScanResult, len(config.PortRange))
 	var wg sync.WaitGroup
 
-	// Worker pool with semaphore
 	if config.Workers > 0 {
 		sem := make(chan struct{}, config.Workers)
 		for _, port := range config.PortRange {
 			wg.Add(1)
 			go func(p int) {
 				defer wg.Done()
-				sem <- struct{}{}        // Acquire semaphore
-				defer func() { <-sem }() // Release semaphore
+				sem <- struct{}{}
+				defer func() { <-sem }()
 				scanPort(config.Host, p, config.Timeout, config.GetBanner, resultChan)
 			}(port)
 		}
 	} else {
-		// Unlimited goroutines
 		for _, port := range config.PortRange {
 			wg.Add(1)
 			go func(p int) {
@@ -127,13 +120,11 @@ func Scan(config *Config) []ScanResult {
 		}
 	}
 
-	// Close result channel when all workers are done
 	go func() {
 		wg.Wait()
 		close(resultChan)
 	}()
 
-	// Collect results
 	for result := range resultChan {
 		if result.Open {
 			results = append(results, result)
@@ -161,8 +152,6 @@ func scanPort(host string, port int, timeoutMs int, getBanner bool, resultChan c
 
 	if getBanner {
 		result.Service, result.Banner = grabBanner(conn, port, timeout)
-	} else {
-		result.Service = guessService(port)
 	}
 
 	resultChan <- result
@@ -171,14 +160,12 @@ func scanPort(host string, port int, timeoutMs int, getBanner bool, resultChan c
 func grabBanner(conn net.Conn, port int, timeout time.Duration) (string, string) {
 	_ = conn.SetReadDeadline(time.Now().Add(timeout))
 
-	// Try to read initial banner
 	reader := bufio.NewReader(conn)
 	banner, _ := reader.ReadString('\n')
 	banner = strings.TrimSpace(banner)
 
-	service := guessService(port)
+	service := "Unknown"
 
-	// For HTTP ports, send a request to get more info
 	if port == 80 || port == 443 || port == 8080 || port == 8443 {
 		httpResponse := grabHTTPBanner(conn, timeout)
 		if httpResponse != "" {
@@ -191,7 +178,6 @@ func grabBanner(conn net.Conn, port int, timeout time.Duration) (string, string)
 		}
 	}
 
-	// Identify service based on banner
 	if service == "Unknown" && banner != "" {
 		service = identifyService(banner)
 	}
@@ -209,53 +195,12 @@ func grabHTTPBanner(conn net.Conn, timeout time.Duration) string {
 	_ = conn.SetReadDeadline(time.Now().Add(timeout))
 	scanner := bufio.NewScanner(conn)
 	var response strings.Builder
-	for i := 0; i < 10 && scanner.Scan(); i++ { // Read first 10 lines
+	for i := 0; i < 10 && scanner.Scan(); i++ {
 		response.WriteString(scanner.Text())
 		response.WriteString("\n")
 	}
 
 	return strings.TrimSpace(response.String())
-}
-
-func guessService(port int) string {
-	switch port {
-	case 21:
-		return "FTP"
-	case 22:
-		return "SSH"
-	case 23:
-		return "Telnet"
-	case 25:
-		return "SMTP"
-	case 53:
-		return "DNS"
-	case 80:
-		return "HTTP"
-	case 110:
-		return "POP3"
-	case 143:
-		return "IMAP"
-	case 443:
-		return "HTTPS"
-	case 993:
-		return "IMAPS"
-	case 995:
-		return "POP3S"
-	case 3306:
-		return "MySQL"
-	case 3389:
-		return "RDP"
-	case 5432:
-		return "PostgreSQL"
-	case 6379:
-		return "Redis"
-	case 8080:
-		return "HTTP"
-	case 8443:
-		return "HTTPS"
-	default:
-		return "Unknown"
-	}
 }
 
 func identifyService(banner string) string {
