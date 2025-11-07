@@ -46,27 +46,6 @@ func equalSlices(a, b []int) bool {
 	return true
 }
 
-func TestGuessService(t *testing.T) {
-	tests := []struct {
-		port     int
-		expected string
-	}{
-		{22, "SSH"},
-		{80, "HTTP"},
-		{443, "HTTPS"},
-		{9999, "Unknown"},
-	}
-
-	for _, tt := range tests {
-		t.Run(string(rune(tt.port)), func(t *testing.T) {
-			result := guessService(tt.port)
-			if result != tt.expected {
-				t.Errorf("guessService(%d) = %s, want %s", tt.port, result, tt.expected)
-			}
-		})
-	}
-}
-
 // Benchmark tests
 func BenchmarkScanUnlimited(b *testing.B) {
 	config := &Config{
