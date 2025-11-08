@@ -84,12 +84,10 @@ func (s *MemoryStorage) filterTasks(tasks []models.Task, query models.TaskQuery)
 	var filtered []models.Task
 
 	for _, task := range tasks {
-		// Фильтр по статусу выполнения
 		if query.Completed != nil && task.Completed != *query.Completed {
 			continue
 		}
 
-		// Полнотекстовый поиск
 		if query.Search != "" {
 			searchLower := strings.ToLower(query.Search)
 			titleLower := strings.ToLower(task.Title)

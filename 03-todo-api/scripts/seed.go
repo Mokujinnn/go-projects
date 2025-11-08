@@ -30,7 +30,7 @@ func main() {
 		task := models.Task{
 			Title:       taskReq.Title,
 			Description: taskReq.Description,
-			Completed:   i >= 10, // Последние 2 задачи выполнены
+			Completed:   i >= 10,
 			CreatedAt:   time.Now().Add(-time.Duration(i) * time.Hour),
 			UpdatedAt:   time.Now().Add(-time.Duration(i) * time.Hour),
 		}
