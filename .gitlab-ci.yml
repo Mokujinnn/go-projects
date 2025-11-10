@@ -1,4 +1,0 @@
-include:
-  - project: 'backend/ci'
-    file: 'templates/backend-ci.yml'
-    ref: '2025'
